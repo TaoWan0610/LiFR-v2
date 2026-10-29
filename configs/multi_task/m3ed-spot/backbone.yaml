@@ -1,0 +1,69 @@
+version_name: m3ed-spot_backbone
+out_dir: ${OUTPUT_ROOT}/multi_task/m3ed-spot/
+train_db_name: M3ED
+val_db_name: M3ED
+dataset_variant: standard
+m3ed_root: ${DATA_ROOT}/m3ed-spot/moge2
+m3ed_semantic_root: ${DATA_ROOT}/m3ed-spot/semantic
+trBatch: 4
+valBatch: 4
+nworkers: 4
+ignore_index: 255
+image_size:
+- 360
+- 640
+train_scale:
+- 360
+- 640
+test_scale:
+- 360
+- 640
+precision: bf16
+intermediate_supervision: false
+val_interval: 1000
+epochs: 999999
+max_iter: 100000
+optimizer: adamw
+optimizer_kwargs:
+  lr: 0.0001
+  weight_decay: 1.0e-06
+grad_clip_param:
+  max_norm: 1.0
+  norm_type: 2.0
+scheduler: warmuppolylr
+scheduler_kwargs:
+  power: 0.95
+  warmup_iter: 1000
+  warmup_ratio: 0.1
+model: MTMamba_plus
+backbone: swin_tiny
+load_pretrained: true
+pretrained_backbone_dir: ${WEIGHTS_ROOT}/pretrained
+pretrained_backbone_filename: mmseg_swin_tiny_patch4_window7_224.pth
+task_dictionary:
+  include_semseg: true
+  include_depth: true
+  semseg_num_classes: 11
+  depth_min: 0.1
+  depth_max: 120.0
+semseg_class_names:
+- class_0
+- class_1
+- class_2
+- class_3
+- class_4
+- class_5
+- class_6
+- class_7
+- class_8
+- class_9
+- class_10
+loss_kwargs:
+  loss_scheme: log
+  semseg_loss:
+    name: ohem
+    thresh: 0.7
+  loss_weights:
+    semseg: 1.0
+    depth: 1.0
+training_stage: backbone

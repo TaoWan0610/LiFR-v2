@@ -1,0 +1,90 @@
+event_refine_enabled: false
+memory_type: memory_v1
+version_name: shf_emergy_lifr_v1
+out_dir: ${OUTPUT_ROOT}/multi_task/shf_emergy/
+train_db_name: shf_emergy
+val_db_name: shf_emergy
+dataset_variant: anytime
+shf_emergy_root: ${DATA_ROOT}/shf_emergy/moge2
+trBatch: 2
+valBatch: 2
+nworkers: 4
+ignore_index: 255
+image_size:
+- 440
+- 640
+train_scale:
+- 440
+- 640
+test_scale:
+- 440
+- 640
+time_window_steps: 1
+event_bins: 20
+event_reduce_factor: 5
+precision: bf16
+intermediate_supervision: false
+val_interval: 1000
+epochs: 999999
+max_iter: 100000
+optimizer: adamw
+optimizer_kwargs:
+  lr: 5.0e-05
+  weight_decay: 0.005
+grad_clip_param:
+  max_norm: 1.0
+  norm_type: 2.0
+scheduler: warmuppolylr
+scheduler_kwargs:
+  power: 0.95
+  warmup_epochs: 2
+  warmup_ratio: 0.1
+model: LiFRV1
+backbone: swin_tiny
+load_pretrained: false
+init_model_path: ${WEIGHTS_ROOT}/multi_task/backbone_shf_emergy.pt
+resume_flow_net: ${WEIGHTS_ROOT}/flownet/dsec.tar
+flow_iters: 12
+warm_start_flow: false
+memory_num_heads: 8
+task_dictionary:
+  include_semseg: true
+  include_depth: true
+  semseg_num_classes: 11
+  depth_min: 0.1
+  depth_max: 80.0
+semseg_class_names:
+- background
+- building
+- fence
+- person
+- pole
+- road
+- sidewalk
+- vegetation
+- car
+- road_lines
+- traffic_sign
+loss_kwargs:
+  loss_scheme: log
+  semseg_loss:
+    name: ohem
+    thresh: 0.7
+    aux_weights:
+    - 1.0
+    - 0.0
+  depth_loss:
+    min_depth: 0.1
+    max_depth: 80.0
+    weight_ranges:
+    - - 20.0
+      - 2.0
+    - - 40.0
+      - 1.5
+    - - 80.0
+      - 1.0
+  loss_weights:
+    semseg: 1.0
+    depth: 1.0
+training_stage: propagation
+batch_input: true

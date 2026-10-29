@@ -1,0 +1,14 @@
+-r ../../requirements.txt
+numpy<2
+timm==0.9.16
+mmcv==2.1.0
+mmengine==0.10.7
+mmsegmentation==1.2.2
+easydict
+ftfy
+regex
+scikit-image
+mamba-ssm==1.1.2
+causal-conv1d==1.4.0
+# Install the CuPy wheel matching your CUDA separately.
+

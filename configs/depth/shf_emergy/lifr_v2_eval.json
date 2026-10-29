@@ -1,0 +1,45 @@
+{
+  "preset": "anytime",
+  "dataset": "shf_emergy",
+  "backbone": "vits",
+  "paths": {
+    "dataset_root": "${DATA_ROOT}/shf_emergy/moge2",
+    "val_index": ".val.txt",
+    "checkpoint": "${WEIGHTS_ROOT}/depth/lifr2_shf_emergy.pt",
+    "output": "${OUTPUT_ROOT}/depth/shf_emergy/evaluation.json",
+    "event_root": "${DATA_ROOT}/shf_emergy"
+  },
+  "data": {
+    "width": 640,
+    "height": 440,
+    "min_depth": 1.0,
+    "max_depth": 80.0,
+    "metric_depth_ranges": [
+      [
+        1.0,
+        10.0
+      ],
+      [
+        1.0,
+        20.0
+      ],
+      [
+        1.0,
+        80.0
+      ]
+    ],
+    "frame_interval_ms": 50
+  },
+  "eval": {
+    "precision": "fp32",
+    "num_load_workers": 4,
+    "num_process_workers": 8,
+    "drop_max_depth": 80.0,
+    "batch_size": 2,
+    "num_tokens": null,
+    "resolution_level": 9
+  },
+  "anytime": {
+    "duration_ms": 50
+  }
+}

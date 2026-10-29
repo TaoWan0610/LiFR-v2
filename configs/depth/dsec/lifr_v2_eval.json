@@ -1,0 +1,30 @@
+{
+  "preset": "anytime",
+  "dataset": "dsec",
+  "backbone": "vits",
+  "paths": {
+    "dataset_root": "${DATA_ROOT}/dsec/moge2",
+    "val_index": ".val.txt",
+    "checkpoint": "${WEIGHTS_ROOT}/depth/lifr2_dsec.pt",
+    "output": "${OUTPUT_ROOT}/depth/dsec/evaluation.json",
+    "event_root": "${DATA_ROOT}/dsec"
+  },
+  "data": {
+    "width": 640,
+    "height": 440,
+    "frame_interval_ms": 50
+  },
+  "eval": {
+    "precision": "fp32",
+    "num_load_workers": 4,
+    "num_process_workers": 8,
+    "drop_max_depth": 1000.0,
+    "num_tokens": null,
+    "resolution_level": 9,
+    "batch_size": 4
+  },
+  "anytime": {
+    "duration_ms": 100,
+    "event_bins": 20
+  }
+}

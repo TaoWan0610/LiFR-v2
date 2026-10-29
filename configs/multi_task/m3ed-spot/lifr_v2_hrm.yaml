@@ -1,0 +1,99 @@
+memory_layers: 4
+version_name: m3ed-spot_lifr_v2_hrm
+out_dir: ${OUTPUT_ROOT}/multi_task/m3ed-spot/
+train_db_name: M3ED
+val_db_name: M3ED
+dataset_variant: refine
+m3ed_root: ${DATA_ROOT}/m3ed-spot/moge2
+m3ed_semantic_root: ${DATA_ROOT}/m3ed-spot/semantic
+batch_input: true
+trBatch: 2
+valBatch: 2
+nworkers: 8
+ignore_index: 255
+image_size:
+- 360
+- 640
+train_scale:
+- 360
+- 640
+test_scale:
+- 360
+- 640
+time_window_steps: 1
+event_bins: 20
+event_reduce_factor: 5
+precision: bf16
+intermediate_supervision: false
+val_interval: 1000
+epochs: 999999
+max_iter: 100000
+optimizer: adamw
+optimizer_kwargs:
+  lr: 0.0001
+  weight_decay: 0.005
+grad_clip_param:
+  max_norm: 1.0
+  norm_type: 2.0
+scheduler: warmuppolylr
+scheduler_kwargs:
+  power: 0.95
+  warmup_iter: 0
+  warmup_ratio: 0.1
+model: LiFRV2
+backbone: swin_tiny
+load_pretrained: false
+init_model_path: ${WEIGHTS_ROOT}/multi_task/backbone_m3ed_spot.pt
+required_init_prefixes:
+- backbone.
+resume_flow_net: ${WEIGHTS_ROOT}/flownet/dsec.tar
+flow_iters: 2
+warm_start_flow: false
+anytime_flag: false
+memory_type: hrm
+memory_num_heads: 8
+memory_num_slots: 5
+event_refine_enabled: false
+event_refine_stage3_prior: 0.5
+event_refine_stage2_prior: 0.25
+event_refine_input_multiplier: 255.0
+task_dictionary:
+  include_semseg: true
+  include_depth: true
+  semseg_num_classes: 11
+  depth_min: 0.1
+  depth_max: 120.0
+semseg_class_names:
+- background
+- building
+- fence
+- person
+- pole
+- road
+- sidewalk
+- vegetation
+- car
+- wall
+- traffic_sign
+loss_kwargs:
+  loss_scheme: log
+  semseg_loss:
+    name: ohem
+    thresh: 0.7
+    aux_weights:
+    - 1.0
+    - 0.0
+  depth_loss:
+    min_depth: 0.1
+    max_depth: 120.0
+    weight_ranges:
+    - - 20.0
+      - 2.0
+    - - 40.0
+      - 1.5
+    - - 120.0
+      - 1.0
+  loss_weights:
+    semseg: 1.0
+    depth: 1.0
+training_stage: propagation

@@ -1,0 +1,60 @@
+{
+  "preset": "refine",
+  "dataset": "m3ed-spot",
+  "backbone": "vits",
+  "paths": {
+    "dataset_root": "${DATA_ROOT}/m3ed-spot/moge2",
+    "event_root": "${DATA_ROOT}/m3ed-spot",
+    "train_index": ".train.txt",
+    "workspace": "${OUTPUT_ROOT}/depth/m3ed-spot/lifr_v2",
+    "init_checkpoint": "${WEIGHTS_ROOT}/depth/hrm_m3ed_spot.pt",
+    "event_checkpoint": "${WEIGHTS_ROOT}/depth/event_encoder_m3ed_spot.pt",
+    "resume_checkpoint": "",
+    "flow_checkpoint": ""
+  },
+  "data": {
+    "width": 640,
+    "height": 360,
+    "clamp_max_depth": 120.0,
+    "frame_interval_ms": 40,
+    "num_tokens_range": [
+      1200,
+      3600
+    ]
+  },
+  "train": {
+    "num_iterations": 50000,
+    "batch_size_forward": 4,
+    "gradient_accumulation_steps": 1,
+    "precision": "amp",
+    "num_load_workers": 4,
+    "num_process_workers": 8,
+    "dataloader_buffer_size": 8,
+    "validate_every": 1000,
+    "log_every": 10,
+    "gate_start_step": 1000,
+    "find_unused_parameters": true
+  },
+  "optimizer": {
+    "lr": 0.0001,
+    "weight_decay": 0.0001,
+    "decoder_lr": 1e-05,
+    "scale_head_lr": 1e-05
+  },
+  "lr_scheduler": {
+    "warmup_start": 0,
+    "warmup_end": 1000,
+    "step_size": 25000,
+    "gamma": 0.5
+  },
+  "anytime": {
+    "duration_ms": 80,
+    "memory_type": "hrm",
+    "num_memory_slots": 5,
+    "memory_layers": 1,
+    "flow_iters": 2
+  },
+  "refine": {
+    "event_encoder": "metadepth-cnn"
+  }
+}

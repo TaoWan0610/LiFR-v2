@@ -1,0 +1,79 @@
+version_name: dsec_backbone
+out_dir: ${OUTPUT_ROOT}/multi_task/dsec/
+train_db_name: DSEC
+val_db_name: DSEC
+dataset_variant: standard
+dsec_root: ${DATA_ROOT}/dsec
+trBatch: 4
+valBatch: 4
+nworkers: 4
+ignore_index: 255
+image_size:
+- 440
+- 640
+train_scale:
+- 440
+- 640
+test_scale:
+- 440
+- 640
+precision: bf16
+intermediate_supervision: false
+val_interval: 1000
+epochs: 999999
+max_iter: 40000
+optimizer: adamw
+optimizer_kwargs:
+  lr: 0.0001
+  weight_decay: 1.0e-06
+scheduler: poly
+model: MTMamba_plus
+backbone: swin_tiny
+load_pretrained: true
+pretrained_backbone_dir: ${WEIGHTS_ROOT}/pretrained
+pretrained_backbone_filename: mmseg_swin_tiny_patch4_window7_224.pth
+task_dictionary:
+  include_semseg: true
+  include_depth: true
+  semseg_num_classes: 11
+  depth_min: 0.1
+  depth_max: 80.0
+train_sequences:
+- zurich_city_00_a
+- zurich_city_01_a
+- zurich_city_02_a
+- zurich_city_04_a
+- zurich_city_05_a
+- zurich_city_06_a
+- zurich_city_07_a
+- zurich_city_08_a
+val_sequences:
+  depth:
+  - thun_00_a
+  - zurich_city_04_c
+  - zurich_city_11_a
+  semseg:
+  - zurich_city_13_a
+  - zurich_city_14_c
+  - zurich_city_15_a
+semseg_class_names:
+- background
+- building
+- fence
+- person
+- pole
+- road
+- sidewalk
+- vegetation
+- car
+- wall
+- traffic sign
+loss_kwargs:
+  loss_scheme: log
+  semseg_loss:
+    name: ohem
+    thresh: 0.7
+  loss_weights:
+    semseg: 1.0
+    depth: 1.0
+training_stage: backbone

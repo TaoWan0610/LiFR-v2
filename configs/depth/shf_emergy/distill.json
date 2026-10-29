@@ -1,0 +1,51 @@
+{
+  "dataset": "shf_emergy",
+  "paths": {
+    "dataset_root": "${DATA_ROOT}/shf_emergy/moge2",
+    "event_root": "${DATA_ROOT}/shf_emergy",
+    "raw_event_h5_root": "${DATA_ROOT}/shf_emergy/raw_events_h5",
+    "train_index": ".train.txt",
+    "teacher_checkpoint": "${WEIGHTS_ROOT}/depth/backbone_shf_emergy.pt",
+    "resume_checkpoint": "",
+    "workspace": "${OUTPUT_ROOT}/depth/shf_emergy/distill"
+  },
+  "model": {
+    "distiller": "metadepth_cnn_aggregate",
+    "event_encoder": "metadepth-cnn"
+  },
+  "data": {
+    "width": 640,
+    "height": 440,
+    "frame_interval_ms": 50,
+    "event_bins": 20,
+    "event_layout": "dsec",
+    "clamp_max_depth": 100.0,
+    "num_tokens_range": [
+      1200,
+      1200
+    ]
+  },
+  "train": {
+    "num_iterations": 100000,
+    "batch_size_forward": 4,
+    "precision": "bf16",
+    "num_load_workers": 8,
+    "num_process_workers": 16,
+    "dataloader_buffer_size": 16,
+    "grad_clip_norm": 1.0,
+    "validate_every": 1000,
+    "log_every": 20,
+    "seed": 3407
+  },
+  "optimizer": {
+    "lr": 0.0001,
+    "weight_decay": 0.0001,
+    "power": 0.9
+  },
+  "loss": {
+    "event_tau": 64.0,
+    "intra_weight": 10.0,
+    "cross_weight": 4.0,
+    "similarity_threshold": 0.1
+  }
+}

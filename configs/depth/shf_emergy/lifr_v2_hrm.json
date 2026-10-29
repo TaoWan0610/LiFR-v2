@@ -1,0 +1,81 @@
+{
+  "preset": "anytime",
+  "dataset": "shf_emergy",
+  "backbone": "vits",
+  "paths": {
+    "dataset_root": "${DATA_ROOT}/shf_emergy/moge2",
+    "event_root": "${DATA_ROOT}/shf_emergy",
+    "train_index": ".train.txt",
+    "val_index": ".val_person_car_active_back_available.txt",
+    "workspace": "${OUTPUT_ROOT}/depth/shf_emergy/lifr_v2_hrm",
+    "init_checkpoint": "${WEIGHTS_ROOT}/depth/backbone_shf_emergy.pt",
+    "resume_checkpoint": "",
+    "flow_checkpoint": "${WEIGHTS_ROOT}/flownet/dsec.tar"
+  },
+  "data": {
+    "width": 640,
+    "height": 440,
+    "clamp_max_depth": 80.0,
+    "min_depth": 1.0,
+    "max_depth": 80.0,
+    "metric_depth_ranges": [
+      [
+        1.0,
+        10.0
+      ],
+      [
+        1.0,
+        20.0
+      ],
+      [
+        1.0,
+        80.0
+      ]
+    ],
+    "frame_interval_ms": 50,
+    "num_tokens_range": [
+      1200,
+      3600
+    ]
+  },
+  "train": {
+    "num_iterations": 20000,
+    "batch_size_forward": 4,
+    "gradient_accumulation_steps": 1,
+    "precision": "bf16",
+    "num_load_workers": 8,
+    "num_process_workers": 16,
+    "dataloader_buffer_size": 16,
+    "validate_every": 1000,
+    "best_metric": "abs_rel_1_80m",
+    "log_every": 10,
+    "find_unused_parameters": true
+  },
+  "optimizer": {
+    "lr": 0.0001,
+    "anytime_lr": 0.0001,
+    "flow_lr": 0.0001,
+    "softsplat_lr": 0.0001,
+    "memory_lr": 0.0001,
+    "weight_decay": 1e-06,
+    "neck_lr": 0.0001,
+    "head_lr": 1e-05
+  },
+  "lr_scheduler": {
+    "warmup_start": 1000,
+    "warmup_end": 2000,
+    "step_size": 10000,
+    "gamma": 0.5
+  },
+  "anytime": {
+    "duration_ms": 50,
+    "memory_type": "hrm",
+    "num_memory_slots": 5,
+    "event_bins": 20,
+    "event_reduce_factor": 5,
+    "flow_iters": 2,
+    "warp_refine_identity_init": false,
+    "warp_refine_max_scale": 1.0,
+    "memory_layers": 1
+  }
+}

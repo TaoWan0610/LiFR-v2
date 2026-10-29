@@ -1,0 +1,14 @@
+numpy
+scipy
+Pillow
+opencv-python
+PyYAML
+h5py
+hdf5plugin
+tqdm
+einops
+matplotlib
+tabulate
+omegaconf
+tensorboard
+

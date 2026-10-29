@@ -1,0 +1,40 @@
+seed: 3407
+teacher:
+  config: ${REPO_ROOT}/configs/multi_task/m3ed-spot/backbone.yaml
+  checkpoint: ${WEIGHTS_ROOT}/multi_task/backbone_m3ed_spot.pt
+student:
+  checkpoint: ${WEIGHTS_ROOT}/seg/mit_b0.pth
+data:
+  type: m3ed
+  root: ${DATA_ROOT}/m3ed-spot
+  event_bins: 20
+  event_scale: 255.0
+  frame_index_stride: 1
+  image_size:
+  - 360
+  - 640
+  horizontal_flip: false
+  train_exclude_sequences: null
+  val_exclude_sequences: null
+loss:
+  stage_weight: 1.0
+  intra_weight: 10.0
+  cross_weight: 4.0
+  similarity_threshold: 0.1
+  relation_grid: 32
+train:
+  epochs: 100
+  batch_size: 4
+  val_batch_size: 4
+  num_workers: 8
+  precision: bf16
+  warmup_epochs: 1
+  poly_power: 0.9
+  grad_clip: 1.0
+  log_every: 20
+  validate_every_epochs: 1
+optimizer:
+  lr: 5.0e-05
+  patch_lr_multiplier: 1.0
+  weight_decay: 0.0001
+output: ${OUTPUT_ROOT}/multi_task/m3ed-spot/distill

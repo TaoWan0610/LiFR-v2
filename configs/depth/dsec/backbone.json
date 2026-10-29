@@ -1,0 +1,47 @@
+{
+  "preset": "backbone",
+  "dataset": "dsec",
+  "backbone": "vits",
+  "paths": {
+    "dataset_root": "${DATA_ROOT}/dsec/moge2",
+    "event_root": "${DATA_ROOT}/dsec",
+    "train_index": ".train.txt",
+    "val_index": ".val.txt",
+    "workspace": "${OUTPUT_ROOT}/depth/dsec/backbone",
+    "init_checkpoint": "${WEIGHTS_ROOT}/depth/moge2_vits.pt",
+    "resume_checkpoint": ""
+  },
+  "data": {
+    "width": 640,
+    "height": 440,
+    "clamp_max_depth": 1000.0,
+    "frame_interval_ms": 50,
+    "num_tokens_range": [
+      1200,
+      3600
+    ]
+  },
+  "train": {
+    "num_iterations": 50000,
+    "batch_size_forward": 4,
+    "gradient_accumulation_steps": 1,
+    "precision": "bf16",
+    "num_load_workers": 4,
+    "num_process_workers": 8,
+    "dataloader_buffer_size": 8,
+    "validate_every": 1000,
+    "log_every": 10,
+    "find_unused_parameters": true
+  },
+  "optimizer": {
+    "lr": 1e-05,
+    "backbone_lr": 1e-06,
+    "weight_decay": 0.01
+  },
+  "lr_scheduler": {
+    "warmup_start": 0,
+    "warmup_end": 1000,
+    "step_size": 25000,
+    "gamma": 0.5
+  }
+}

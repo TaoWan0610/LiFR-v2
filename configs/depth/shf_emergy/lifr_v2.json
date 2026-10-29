@@ -1,0 +1,292 @@
+{
+  "data": {
+    "image_sizes": [
+      [
+        640,
+        440
+      ]
+    ],
+    "clamp_max_depth": 80.0,
+    "center_augmentation": 0.0,
+    "fov_range_absolute": [
+      1,
+      179
+    ],
+    "fov_range_relative": [
+      1.0,
+      1.0
+    ],
+    "image_augmentation": [
+      "jittering",
+      "jpeg_loss",
+      "blurring"
+    ],
+    "datasets": [
+      {
+        "name": "CARLA50_refine",
+        "format": "folder",
+        "path": "${DATA_ROOT}/shf_emergy/moge2",
+        "label_type": "C",
+        "weight": 1.0,
+        "index": ".train.txt",
+        "depth": "depth.png",
+        "depth_unit": 1.0,
+        "finite_depth_mask": "only_known",
+        "center_augmentation": 0.0,
+        "fov_range_relative": [
+          1.0,
+          1.0
+        ],
+        "image_augmentation": [
+          "jittering",
+          "jpeg_loss",
+          "blurring"
+        ],
+        "min_depth": 1.0,
+        "max_depth": 80.0,
+        "semantic": "semantic.png",
+        "invalid_semantic_ids": [
+          0
+        ],
+        "requires_events": true,
+        "event_bins": 20,
+        "event_root": "${DATA_ROOT}/shf_emergy",
+        "event_layout": "dsec",
+        "duration_ms": 50,
+        "frame_step_ms": 50
+      }
+    ]
+  },
+  "train": {
+    "workspace": "${OUTPUT_ROOT}/depth/shf_emergy/lifr_v2",
+    "batch_size_forward": 4,
+    "gradient_accumulation_steps": 1,
+    "find_unused_parameters": true,
+    "num_load_workers": 4,
+    "num_process_workers": 8,
+    "dataloader_buffer_size": 8,
+    "enable_mixed_precision": true,
+    "mixed_precision_dtype": "bfloat16",
+    "num_iterations": 40000,
+    "log_every": 10,
+    "seed": 0,
+    "gate_start_step": 5000,
+    "stage": "completion"
+  },
+  "init_checkpoint": {
+    "path": "${WEIGHTS_ROOT}/depth/hrm_shf_emergy.pt"
+  },
+  "model_version": "v2",
+  "model": {
+    "encoder": {
+      "backbone": "dinov2_vits14",
+      "intermediate_layers": [
+        5,
+        11
+      ],
+      "dim_out": 384
+    },
+    "neck": {
+      "dim_in": [
+        386,
+        2,
+        2,
+        2,
+        2
+      ],
+      "dim_out": null,
+      "dim_res_blocks": [
+        384,
+        256,
+        128,
+        64,
+        32
+      ],
+      "num_res_blocks": [
+        0,
+        1,
+        1,
+        1,
+        0
+      ],
+      "res_block_in_norm": "none",
+      "res_block_hidden_norm": "none",
+      "resamplers": [
+        "conv_transpose",
+        "conv_transpose",
+        "conv_transpose",
+        "bilinear"
+      ]
+    },
+    "points_head": {
+      "dim_in": [
+        384,
+        256,
+        128,
+        64,
+        32
+      ],
+      "dim_out": [
+        null,
+        null,
+        null,
+        null,
+        3
+      ],
+      "dim_res_blocks": [
+        384,
+        256,
+        128,
+        64,
+        32
+      ],
+      "num_res_blocks": [
+        0,
+        1,
+        1,
+        1,
+        0
+      ],
+      "res_block_in_norm": "none",
+      "res_block_hidden_norm": "none",
+      "resamplers": [
+        "conv_transpose",
+        "conv_transpose",
+        "conv_transpose",
+        "bilinear"
+      ]
+    },
+    "scale_head": {
+      "dims": [
+        384,
+        384,
+        384,
+        1
+      ]
+    },
+    "remap_output": "exp",
+    "num_tokens_range": [
+      1200,
+      3600
+    ],
+    "anytime": {
+      "enabled": true,
+      "event_bins": 20,
+      "event_reduce_factor": 5,
+      "num_warps": 1,
+      "memory_type": "hrm",
+      "num_memory_slots": 5,
+      "warp_refine_identity_init": false,
+      "warp_refine_max_scale": 1.0,
+      "memory_num_heads": 8,
+      "flow": {
+        "iters": 2,
+        "checkpoint": ""
+      },
+      "refine": {
+        "enabled": true,
+        "event_checkpoint": "${WEIGHTS_ROOT}/depth/event_encoder_shf_emergy.pt",
+        "event_encoder": "metadepth-cnn"
+      },
+      "memory_layers": 1
+    },
+    "remap_exp_clip": 6.0
+  },
+  "optimizer": {
+    "type": "AdamW",
+    "params": [
+      {
+        "params": {
+          "include": [
+            "event_refine.fusion.*",
+            "event_refine.gate.*"
+          ]
+        },
+        "lr": 0.0001,
+        "weight_decay": 0.0001
+      },
+      {
+        "params": {
+          "include": [
+            "neck.*",
+            "points_head.*",
+            "scale_head.*"
+          ]
+        },
+        "lr": 1e-05,
+        "weight_decay": 0.0001
+      }
+    ]
+  },
+  "lr_scheduler": {
+    "type": "SequentialLR",
+    "params": {
+      "schedulers": [
+        {
+          "type": "LambdaLR",
+          "params": {
+            "lr_lambda": "max(0.0, min(1.0, (epoch - 0) / 1))"
+          }
+        },
+        {
+          "type": "StepLR",
+          "params": {
+            "step_size": 25000,
+            "gamma": 0.5
+          }
+        }
+      ],
+      "milestones": [
+        1
+      ]
+    }
+  },
+  "low_resolution_training_steps": 0,
+  "loss": {
+    "invalid": {},
+    "C": {
+      "global": {
+        "function": "affine_invariant_global_loss",
+        "weight": 1.0,
+        "params": {
+          "align_resolution": 48
+        }
+      },
+      "patch_4": {
+        "function": "affine_invariant_local_loss",
+        "weight": 1.0,
+        "params": {
+          "level": 4,
+          "align_resolution": 24,
+          "num_patches": 16
+        }
+      },
+      "metric_scale": {
+        "function": "metric_scale_loss",
+        "weight": 0.5
+      }
+    }
+  },
+  "validation": {
+    "enabled": true,
+    "every": 1000,
+    "batch_size": 2,
+    "metric": "rmse_1_80m",
+    "mode": "min"
+  },
+  "freeze": {
+    "include": [
+      "encoder.*",
+      "flow_net.*",
+      "softsplat_net.*",
+      "hrm.*",
+      "event_refine.event_encoder.*",
+      "event_refine.event_adapter.*"
+    ]
+  },
+  "event_encoder_frozen": true,
+  "depth_loss": {
+    "min_depth": 1.0,
+    "max_depth": 80.0
+  }
+}

@@ -352,10 +352,11 @@ def expand_train_config(raw):
         "dataloader_buffer_size": buffer_size, "find_unused_parameters": refine,
         "validate_every": 2000, "validation_batch_size": 1,
         "best_metric": "rmse", "log_every": 10,
-        "gate_start_step": 1000 if dataset_name.startswith("m3ed-") else 5000,
-    }, nonnegative=("gate_start_step",))
+        "gate_schedule": "fixed", "gate_alpha": 0.01,
+    }, nonnegative=("gate_alpha",))
     if not refine:
-        train.pop("gate_start_step")
+        train.pop("gate_schedule")
+        train.pop("gate_alpha")
     validation = {
         "enabled": True, "every": train.pop("validate_every"), "batch_size": train.pop("validation_batch_size"),
         "metric": train.pop("best_metric"), "mode": "min",

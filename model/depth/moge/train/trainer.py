@@ -304,10 +304,9 @@ def main(
     if frozen_module_paths:
         print(f'Frozen modules kept in eval mode: {frozen_module_paths}')
 
-    gate_start_step = int(config['train'].get('gate_start_step', 5000))
     if completion:
-        unwrapped_model.event_refine.train_gate(initial_step >= gate_start_step)
-        print(f'Completion gate: enable after {gate_start_step} completed optimizer steps')
+        unwrapped_model.event_refine.train_gate(True)
+        print(f"Completion gate schedule: {config['train'].get('gate_schedule', 'fixed')}")
 
     def zero_all_gradients():
         optimizer.zero_grad()
@@ -357,9 +356,12 @@ def main(
         # Training loop
         for i_step in range(initial_step, num_iterations):
 
-            if stage == 'completion' and i_step == gate_start_step:
-                unwrapped_model.event_refine.train_gate(True)
-                print(f'Enabled completion gate at update {i_step + 1}')
+            if completion:
+                unwrapped_model.event_refine.update_gate_alpha(
+                    i_step / max(num_iterations - 1, 1),
+                    config['train'].get('gate_schedule', 'fixed'),
+                    config['train'].get('gate_alpha', 0.01),
+                )
 
             i_accumulate = 0
             while i_accumulate < gradient_accumulation_steps:
@@ -513,6 +515,8 @@ def main(
                 if accelerator.is_main_process:
                     records = key_average(records)
                     record = {'step': i_step + 1, **records}
+                    if completion:
+                        record['gate_alpha'] = float(unwrapped_model.event_refine._gate_alpha)
                     with Path(workspace, 'train_metrics.jsonl').open('a') as stream:
                         stream.write(json.dumps(record) + '\n')
                     pbar.write(json.dumps(record))

@@ -111,7 +111,7 @@ class GateRefine4Stage(ScheduledGate, nn.Module):
         )
         deltas = fusion_outputs
         gates = tuple(
-            gate(warp.detach(), event.detach())[0]
+            self.effective_gate(gate(warp.detach(), event.detach())[0])
             for gate, warp, event in zip(self.gates, warped_features, aligned_events)
         ) if self._use_gate else tuple(torch.ones_like(warp[:, :1]) for warp in warped_features)
         refined = tuple(

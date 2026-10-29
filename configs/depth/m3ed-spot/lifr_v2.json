@@ -32,7 +32,8 @@
     "dataloader_buffer_size": 8,
     "validate_every": 1000,
     "log_every": 10,
-    "gate_start_step": 1000,
+    "gate_schedule": "fixed",
+    "gate_alpha": 0.01,
     "find_unused_parameters": true
   },
   "optimizer": {

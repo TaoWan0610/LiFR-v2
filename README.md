@@ -92,8 +92,16 @@ Keep images, labels and events spatially calibrated and timestamp-aligned.
 For v1, train the backbone then `lifr_v1`. For v2, train the backbone,
 run event distillation and HRM propagation, then train completion. Propagation
 freezes the RGB encoder; completion freezes propagation and both encoders.
-Gate training starts after 50 completion epochs for segmentation, 10 for
-multi-task, and 5,000 updates for DSEC/SHF depth (1,000 for M3ED).
+Gates train from the first completion update with
+`g_eff = (1 - alpha) + alpha * sigmoid(logits)`. By default, `alpha = 0.01`
+throughout training. Set `TRAIN.GATE_SCHEDULE: progressive` (seg),
+`train.gate_schedule: "progressive"` (depth), or `gate_schedule: progressive`
+(multi-task) for piecewise-linear interpolation through alpha values
+`0.01 -> 0.5 -> 1` at 0%, 50% and 100% of training. Seg uses configured epochs;
+depth and multi-task use updates (multi-task respects both epoch and iteration
+limits). Fixed mode uses `GATE_ALPHA` / `gate_alpha`. Alpha is saved in the
+checkpoint and reused for validation and inference; older checkpoints without
+alpha retain their original gate behavior.
 
 Use `--action train` with the selected stage config; use `--action distill`
 with the distillation config. DSEC completion and distillation commands:

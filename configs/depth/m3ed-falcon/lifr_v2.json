@@ -34,7 +34,8 @@
     "validate_every": 1000,
     "log_every": 10,
     "find_unused_parameters": true,
-    "gate_start_step": 1000
+    "gate_schedule": "fixed",
+    "gate_alpha": 0.01
   },
   "optimizer": {
     "lr": 0.0001,

@@ -87,8 +87,7 @@ def train_phase(p, args, train_loader, test_dataloader, model, criterion, optimi
     model.train()
     _keep_frozen_modules_in_eval(model)
     if p.get('training_stage') == 'completion':
-        active = epoch >= int(p.get('gate_start_epoch', 10))
-        _unwrap_model(model).event_refine.train_gate(active)
+        _unwrap_model(model).event_refine.train_gate(True)
 
     primary = not dist.is_initialized() or dist.get_rank() == 0
     progress_bar = tqdm(
@@ -100,7 +99,15 @@ def train_phase(p, args, train_loader, test_dataloader, model, criterion, optimi
     if primary:
         progress_bar.set_description(f'Epoch {epoch}')
 
+    total_iterations = min(int(p['epochs']) * len(train_loader), int(p.max_iter))
     for cpu_batch in progress_bar:
+        if p.get('training_stage') == 'completion':
+            alpha = _unwrap_model(model).event_refine.update_gate_alpha(
+                iter_count / max(total_iterations - 1, 1),
+                p.get('gate_schedule', 'fixed'), p.get('gate_alpha', 0.01),
+            )
+            if tb_writer is not None:
+                tb_writer.add_scalar('Train_Loss/gate_alpha', alpha, iter_count)
         # Forward pass
         batch = to_cuda(cpu_batch)
         model_input = batch if p.get('batch_input', False) else batch['image']

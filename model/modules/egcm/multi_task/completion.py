@@ -253,7 +253,7 @@ class SwinStage123EventRefine(ScheduledGate, nn.Module):
             ).to(dtype=local_logits[0].dtype)
             logit1 = local_logits[0] + self.stage2_prior * stage2_prior
             logits = (logit1, logit2, logit3)
-            gates = tuple(torch.sigmoid(logit) for logit in logits)
+            gates = tuple(self.effective_gate(torch.sigmoid(logit)) for logit in logits)
             if self.force_gate_one:
                 gates = tuple(torch.ones_like(gate) for gate in gates)
         else:

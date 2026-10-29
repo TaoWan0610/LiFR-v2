@@ -70,7 +70,8 @@
     "num_iterations": 40000,
     "log_every": 10,
     "seed": 0,
-    "gate_start_step": 5000,
+    "gate_schedule": "fixed",
+    "gate_alpha": 0.01,
     "stage": "completion"
   },
   "init_checkpoint": {

@@ -13,6 +13,7 @@ from semseg.schedulers import get_scheduler
 from .checkpoints import initialize_model, restore_training_state, TrainingRecord, _unwrap_model
 from .data import build_loaders
 from .evaluation import evaluate
+from model.modules.egcm.schedule import gate_alpha
 
 
 class NullWriter:
@@ -35,7 +36,7 @@ def validate_training_config(cfg, duration):
 
 
 def configure_training(model, cfg, *, epoch=None):
-    """Set the fixed stage recipe; include delayed gates before constructing DDP/optimizer."""
+    """Set the stage recipe with gates trainable throughout completion."""
     core = _unwrap_model(model)
     stage = cfg['TRAIN']['STAGE']
     core.train()
@@ -57,8 +58,12 @@ def configure_training(model, cfg, *, epoch=None):
     refiner = core.mask_refiner
     refiner.fusions.requires_grad_(True)
     refiner.fusions.train()
-    active = epoch is None or epoch >= int(cfg['TRAIN'].get('GATE_START_EPOCH', 50))
-    refiner.train_gate(active)
+    refiner.train_gate(True)
+    options = cfg['TRAIN']
+    refiner.update_gate_alpha(
+        (epoch or 0) / max(int(options['EPOCHS']) - 1, 1),
+        options.get('GATE_SCHEDULE', 'fixed'), options.get('GATE_ALPHA', 0.01),
+    )
 
 
 def build_optimizer(model, cfg, resume=None):
@@ -197,8 +202,7 @@ def train(cfg, gpu, save_dir, duration, logger):
     optimizer, legacy_layout = build_optimizer(model, cfg, checkpoint)
     if distributed:
         model = DDP(model, device_ids=[gpu], output_device=gpu,
-                    find_unused_parameters=bool(options.get('FIND_UNUSED_PARAMETERS', False) or
-                                                (options['STAGE'] == 'completion' and options.get('GATE_START_EPOCH', 50))))
+                    find_unused_parameters=bool(options.get('FIND_UNUSED_PARAMETERS', False)))
     schedule = cfg['SCHEDULER']
     epochs, iterations = int(options['EPOCHS']), len(loaders.train)
     scheduler = get_scheduler(schedule['NAME'], optimizer, (epochs + 1) * iterations,
@@ -215,7 +219,9 @@ def train(cfg, gpu, save_dir, duration, logger):
     try:
         for epoch in range(start_epoch, min(epochs, start_epoch + run_epochs)):
             if primary and options['STAGE'] == 'completion':
-                logger.info(f'Completion epoch={epoch + 1} gate_active={epoch >= options.get("GATE_START_EPOCH", 50)}')
+                alpha = gate_alpha(epoch / max(epochs - 1, 1), options.get('GATE_SCHEDULE', 'fixed'),
+                                   options.get('GATE_ALPHA', 0.01))
+                logger.info(f'Completion epoch={epoch + 1} gate_alpha={alpha:.6f}')
             loss = train_one_epoch(model, loaders.train, optimizer, scheduler, scaler,
                                    objective, cfg, device, epoch, dtype, writer, primary=primary)
             should_evaluate = (((epoch + 1) % int(options['EVAL_INTERVAL']) == 0

@@ -17,10 +17,11 @@ def parse_args():
     for name in ('resume', 'init-checkpoint', 'save-dir', 'dataset-root',
                  'backbone-checkpoint', 'base-checkpoint', 'event-checkpoint'):
         parser.add_argument('--' + name)
-    for name in ('batch-size', 'epochs', 'gate-start-epoch'):
+    for name in ('batch-size', 'epochs'):
         parser.add_argument('--' + name, type=int)
-    for name in ('decoder-lr',):
+    for name in ('decoder-lr', 'gate-alpha'):
         parser.add_argument('--' + name, type=float)
+    parser.add_argument('--gate-schedule', choices=('fixed', 'progressive'))
     parser.add_argument('--set', dest='overrides', nargs='*', default=(), metavar='KEY=VALUE')
     return parser.parse_args()
 
@@ -35,7 +36,8 @@ def main():
         'base_checkpoint': ('MODEL', 'BASE_CHECKPOINT'),
         'event_checkpoint': ('MODEL', 'EVENT_ENCODER_CHECKPOINT'),
         'batch_size': ('TRAIN', 'BATCH_SIZE'), 'epochs': ('TRAIN', 'EPOCHS'),
-        'gate_start_epoch': ('TRAIN', 'GATE_START_EPOCH'),
+        'gate_alpha': ('TRAIN', 'GATE_ALPHA'),
+        'gate_schedule': ('TRAIN', 'GATE_SCHEDULE'),
         'backbone_checkpoint': ('MODEL', 'BACKBONE_CHECKPOINT'),
         'decoder_lr': ('OPTIMIZER', 'DECODER_LR'),
     }

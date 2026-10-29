@@ -65,7 +65,8 @@
     "seed": 0,
     "find_unused_parameters": true,
     "validate_every": 1000,
-    "gate_start_step": 5000,
+    "gate_schedule": "fixed",
+    "gate_alpha": 0.01,
     "stage": "completion"
   },
   "init_checkpoint": {

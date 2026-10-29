@@ -92,4 +92,5 @@ loss_kwargs:
     semseg: 1.0
     depth: 1.0
 training_stage: completion
-gate_start_epoch: 10
+gate_schedule: fixed
+gate_alpha: 0.01

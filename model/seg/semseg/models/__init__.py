@@ -48,8 +48,9 @@ def prepare_model_config(config):
     valid = {'RGBBackbone': {'backbone'}, 'LiFRV1': {'propagation'}, 'LiFRV2': {'propagation', 'completion'}}
     if stage not in valid[name]:
         raise ValueError(f'TRAIN.STAGE={stage!r} is incompatible with {name}')
-    if int(train.get('GATE_START_EPOCH', 50)) < 0:
-        raise ValueError('GATE_START_EPOCH must be nonnegative')
+    if stage == 'completion':
+        from model.modules.egcm.schedule import gate_alpha
+        gate_alpha(0, train.get('GATE_SCHEDULE', 'fixed'), train.get('GATE_ALPHA', 0.01))
     config['DATASET']['ID'] = dataset_name(_dataset_id(config))
     return config
 

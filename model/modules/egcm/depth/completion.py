@@ -102,4 +102,4 @@ class MoGeEventRefine(ScheduledGate, nn.Module):
         if not self._use_gate:
             return warped + delta
         gate, _ = self.gate(warped.detach(), event.detach())
-        return warped + gate * delta
+        return warped + self.effective_gate(gate) * delta

@@ -36,5 +36,5 @@ order: one context voxel before the RGB frame, then one voxel per forward warp.
 RGB-only checkpoints require no events. It saves `depth.npy`; `--visualize` also
 saves `depth_vis.png`.
 
-See [workflows](../../docs/workflows.md), [dataset preparation](../../docs/data.md)
-and [model versions](../../docs/models.md).
+See the root README for [training](../../README.md#training),
+[data](../../README.md#data), and [pretrained weights](../../README.md#pretrained-weights).

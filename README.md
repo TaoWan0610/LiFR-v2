@@ -59,6 +59,22 @@ python run.py --task depth --action eval \
 encoder distillation, propagation and completion stages. Use `--gpus N` for
 multi-GPU training. Arguments after `--` are forwarded to the task entry point.
 
+## Pretrained weights
+
+Download the [DSEC checkpoints](https://github.com/TaoWan0610/LiFR-v2/releases/tag/v2.0-weights)
+and place them at the paths below:
+
+| Component | Download | Local path |
+|---|---|---|
+| Semantic LiFR v2 | [Checkpoint](https://github.com/TaoWan0610/LiFR-v2/releases/download/v2.0-weights/seg_lifr2_dsec.pt) | `weights/seg/lifr2_dsec.pt` |
+| Semantic RGB backbone | [Checkpoint](https://github.com/TaoWan0610/LiFR-v2/releases/download/v2.0-weights/seg_backbone_dsec.pt) | `weights/seg/backbone_dsec.pt` |
+| Depth LiFR v2 | [Checkpoint](https://github.com/TaoWan0610/LiFR-v2/releases/download/v2.0-weights/depth_lifr2_dsec.pt) | `weights/depth/lifr2_dsec.pt` |
+| Depth RGB backbone | [Checkpoint](https://github.com/TaoWan0610/LiFR-v2/releases/download/v2.0-weights/depth_backbone_dsec.pt) | `weights/depth/backbone_dsec.pt` |
+| E-RAFT | [Checkpoint](https://github.com/TaoWan0610/LiFR-v2/releases/download/v2.0-weights/eraft_dsec.tar) | `weights/flownet/dsec.tar` |
+
+See the [release metadata](https://github.com/TaoWan0610/LiFR-v2/releases/download/v2.0-weights/manifest.json)
+for architectures and metric provenance.
+
 ## Repository layout
 
 ```text
@@ -70,10 +86,10 @@ model/
 configs/        Dataset and training-stage configurations for each task
 docs/           Guides and paper figures under assets/
 tools/          Portable configuration loading
-weights/        Checkpoints supplied separately; tracked metadata in manifest.json
+weights/        Downloaded checkpoints (excluded from Git)
 run.py          Common training, distillation, validation and inference launcher
 ```
 
 Data, checkpoint binaries and generated outputs are excluded from source control.
 Original LiFR contributions use the [MIT license](LICENSE). Third-party code
-retains its original terms; see [third-party notices](THIRD_PARTY_NOTICES.md).
+retains its original terms; see the [bundled licenses](docs/third_party/).

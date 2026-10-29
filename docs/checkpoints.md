@@ -1,5 +1,9 @@
 # Checkpoints
 
+Download the [DSEC weights release](https://github.com/TaoWan0610/LiFR-v2/releases/tag/v2.0-weights).
+Release assets have task prefixes to avoid filename collisions; rename and place
+them according to the release notes or the [README download table](../README.md#pretrained-weights).
+
 Set `LIFR_WEIGHTS_ROOT` or pass `--weights-root`. Checkpoints use a flat layout
 within each task directory:
 
@@ -13,7 +17,8 @@ weights/
   manifest.json
 ```
 
-`manifest.json` records checkpoint architecture and metric provenance. The
+[Release metadata](https://github.com/TaoWan0610/LiFR-v2/releases/download/v2.0-weights/manifest.json)
+records checkpoint architecture and metric provenance. The
 current depth v2 checkpoint uses the single-block SA+CA `DepthHRM` and is loaded
 strictly by the public model loader. Full inference checkpoints include all
 components and do not require their original training initialization files.
@@ -39,5 +44,5 @@ event bins, temporal horizon and label mapping consistent with the checkpoint.
 V1 memory, depth single-block HRM and segmentation's stacked HRM weights are
 not interchangeable.
 
-Checkpoint binaries are ignored by Git; publish them separately as release
-assets or through a model hosting service. Keep `manifest.json` with the source.
+Checkpoint binaries are distributed through Releases and remain excluded from
+source control. The release also includes `manifest.json`.
